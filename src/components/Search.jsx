@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { getData } from "../Redux/Results/resultActions";
 import { useDebounce } from "use-debounce";
 import Links from "./Links";
-import { setLoading } from '../Redux/Loading/loadingActions';
+import { setLoading } from "../Redux/Loading/loadingActions";
 
 const baseUrl = "https://google-search3.p.rapidapi.com/api/v1";
 
 const Search = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const loading = useSelector(state=>state.loading.loading)
+  const loading = useSelector((state) => state.loading.loading);
 
   // const [searchTerm, setSearchTerm] = useState("manchester united");
   const [text, setText] = useState("");
 
-  const [debouncedValue] = useDebounce(text, 300);
+  const [debouncedValue] = useDebounce(text, 500);
 
-  // useEffect(() => {
-  //   if (debouncedValue) {
-  //     setText(debouncedValue);
-  //   }
-  // }, [debouncedValue]);
-  
+  useEffect(() => {
+    if (debouncedValue) {
+      setText(debouncedValue);
+    }
+  }, []);
 
   //fetch data from Api
   const fetchResults = async (type) => {
@@ -32,7 +31,7 @@ const Search = () => {
       headers: {
         "X-User-Agent": "desktop",
         "X-RapidAPI-Host": "google-search3.p.rapidapi.com",
-        "X-RapidAPI-Key": process.env.REACT_APP_RAPIDAPI_KEY,
+        "X-RapidAPI-Key": process.env.REACT_APP_RAPIDAPI_API_KEY,
       },
     });
     const data = await response.json();
@@ -43,19 +42,17 @@ const Search = () => {
     } else {
       dispatch(getData(data.results));
     }
-      dispatch(setLoading());
+    dispatch(setLoading());
   };
 
   useEffect(() => {
-     if (debouncedValue) {
-       setText(debouncedValue);
-     }
-    
+    if (debouncedValue) {
+      setText(debouncedValue);
+    }
+
     if (text) {
       fetchResults(`${location.pathname}/q=${text}&num=40`);
     }
-  
-
   }, [debouncedValue, location.pathname]);
 
   return (
